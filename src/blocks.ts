@@ -1,0 +1,11 @@
+export const COLS=20, ROWS=14;
+export const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
+export type Piece={shape:number[][];x:number;y:number;kind:number};
+export type Game={board:number[][];piece:Piece;next:number;bag:number[];score:number;lines:number;over:boolean};
+export const empty=()=>Array.from({length:ROWS},()=>Array(COLS).fill(0));
+export function spawn(kind:number):Piece{return {shape:shapes[kind].map(r=>[...r]),x:Math.floor((COLS-shapes[kind][0].length)/2),y:0,kind}}
+export function fits(board:number[][],p:Piece){return p.shape.every((row,y)=>row.every((v,x)=>!v||(p.x+x>=0&&p.x+x<COLS&&p.y+y>=0&&p.y+y<ROWS&&!board[p.y+y][p.x+x])))}
+function draw(bag:number[]){if(!bag.length)bag=Array.from({length:7},(_,i)=>i).sort(()=>Math.random()-.5);return {kind:bag[0],bag:bag.slice(1)}}
+export function fresh():Game{const a=draw([]),b=draw(a.bag);return {board:empty(),piece:spawn(a.kind),next:b.kind,bag:b.bag,score:0,lines:0,over:false}}
+export function lock(g:Game):Game{const board=g.board.map(r=>[...r]);g.piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)board[g.piece.y+y][g.piece.x+x]=g.piece.kind+1}));const kept=board.filter(r=>r.some(v=>!v));const cleared=ROWS-kept.length;while(kept.length<ROWS)kept.unshift(Array(COLS).fill(0));const p=spawn(g.next),n=draw(g.bag);return {...g,board:kept,piece:p,next:n.kind,bag:n.bag,score:g.score+[0,100,300,500,800][cleared]*(1+Math.floor(g.lines/10)),lines:g.lines+cleared,over:!fits(kept,p)}}
+export function act(g:Game,action:string):Game{if(g.over)return g;let p={...g.piece};if(action==='rotate'){const a=p.shape;p.shape=a[0].map((_,x)=>a.map(row=>row[x]).reverse());for(const dx of [0,-1,1,-2,2]){const candidate={...p,x:p.x+dx};if(fits(g.board,candidate))return {...g,piece:candidate}}return g}if(action==='drop'){let distance=0;while(fits(g.board,{...p,y:p.y+1})){p={...p,y:p.y+1};distance++}return lock({...g,piece:p,score:g.score+distance*2})}if(action==='left')p.x--;if(action==='right')p.x++;if(action==='down'||action==='tick')p.y++;if(fits(g.board,p))return {...g,piece:p,score:g.score+(action==='down'?1:0)};return action==='down'||action==='tick'?lock(g):g}

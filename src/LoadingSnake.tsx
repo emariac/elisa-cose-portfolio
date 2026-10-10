@@ -1,0 +1,18 @@
+import {useEffect,useRef,useState} from 'react';
+type Point={x:number;y:number};
+const N=14;
+const start=()=>[{x:5,y:7},{x:4,y:7},{x:3,y:7}];
+function foodFor(body:Point[]){const free:Point[]=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(!body.some(p=>p.x===x&&p.y===y))free.push({x,y});return free[Math.floor(Math.random()*free.length)]??{x:-1,y:-1}}
+export default function LoadingSnake({loading}:{loading:boolean}){
+ const [open,setOpen]=useState(false),[body,setBody]=useState(start),[food,setFood]=useState<Point>({x:10,y:7}),[over,setOver]=useState(false),[paused,setPaused]=useState(false);
+ const direction=useRef({x:1,y:0}),queued=useRef(false),panel=useRef<HTMLDivElement>(null);
+ useEffect(()=>{setOpen(false);if(!loading)return;const timer=setTimeout(()=>{direction.current={x:1,y:0};queued.current=false;setBody(start());setFood({x:10,y:7});setOver(false);setPaused(false);setOpen(true)},4000);return()=>clearTimeout(timer)},[loading]);
+
+ useEffect(()=>{const pause=()=>{if(document.hidden)setPaused(true)};document.addEventListener('visibilitychange',pause);return()=>document.removeEventListener('visibilitychange',pause)},[]);
+ function turn(x:number,y:number){if(queued.current||over||paused)return;const d=direction.current;if(d.x===-x&&d.y===-y)return;direction.current={x,y};queued.current=true}
+ useEffect(()=>{if(!loading||!open||over||paused)return;const timer=setInterval(()=>{setBody(old=>{const head={x:old[0].x+direction.current.x,y:old[0].y+direction.current.y};queued.current=false;const ate=head.x===food.x&&head.y===food.y;const occupied=ate?old:old.slice(0,-1);if(head.x<0||head.y<0||head.x>=N||head.y>=N||occupied.some(p=>p.x===head.x&&p.y===head.y)){setOver(true);return old}const next=[head,...old];if(ate){setFood(foodFor(next));if(next.length===N*N)setOver(true)}else next.pop();return next})},150);return()=>clearInterval(timer)},[loading,open,over,paused,food]);
+ function reset(){direction.current={x:1,y:0};queued.current=false;setBody(start());setFood({x:10,y:7});setOver(false);setPaused(false);panel.current?.focus()}
+ function close(){setOpen(false);}
+ if(!loading||!open)return null;
+ return <div className="loading-easter-egg"><div className="snake-panel" ref={panel} tabIndex={0} role="region" aria-label="Snake game. Use arrow keys or WASD. Space pauses. Escape closes." onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setPaused(true)}} onKeyDown={e=>{const keys:Record<string,[number,number]>={ArrowUp:[0,-1],w:[0,-1],ArrowDown:[0,1],s:[0,1],ArrowLeft:[-1,0],a:[-1,0],ArrowRight:[1,0],d:[1,0]};const next=keys[e.key];if(next){e.preventDefault();turn(...next)}else if(e.key===' '){e.preventDefault();setPaused(p=>!p)}else if(e.key==='Escape'){e.preventDefault();close()}}}><div className="snake-top"><span>Snake <i>{body.length-3}</i></span><button onClick={close} aria-label="Close Snake">×</button></div><svg viewBox="0 0 140 140" role="img" aria-label={`Snake board. Score ${body.length-3}`}><rect width="140" height="140" fill="#ece7f5"/>{body.map((p,i)=><rect key={i} x={p.x*10+1} y={p.y*10+1} width="8" height="8" rx="2" fill={i===0?'#211b29':'#746281'}/>)}{food.x>=0&&<circle cx={food.x*10+5} cy={food.y*10+5} r="3.5" fill="#d163ae"/>}</svg><div className="snake-state" aria-live="polite">{over?'Game over':paused?'Paused':'A little detour.'}</div><div className="snake-controls">{([[0,-1,'↑'],[-1,0,'←'],[0,1,'↓'],[1,0,'→']] as const).map(([x,y,label])=><button key={label} aria-label={{'↑':'Up','←':'Left','↓':'Down','→':'Right'}[label]} onClick={()=>turn(x,y)}>{label}</button>)}</div><button className="snake-action" onClick={over?reset:()=>setPaused(p=>!p)}>{over?'Play again':paused?'Resume':'Pause'}</button></div></div>
+}
