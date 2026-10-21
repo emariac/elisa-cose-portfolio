@@ -4,6 +4,7 @@ import gsap from 'gsap';
 const Scene = lazy(() => import('./Scene'));
 import './style.css';
 import Work from './Work';
+import BrandTicker from './BrandTicker';
 import LoadingSnake from './LoadingSnake';
 import PhotoBoothFooter from './PhotoBoothFooter';
 import Playground from './Playground';
@@ -27,7 +28,7 @@ function Home(){
  return <>
  <header className="nav"><a className="wordmark" href="#home" aria-label="Elisa Cose home">ec<span>✳</span></a><a className="location" href="#about">BASED IN NEW YORK, NY</a><nav aria-label="Main navigation"><a href="#work">Work</a><a href="#about">About</a><a href={sitePath('/playground/')}>Playground</a><a href="mailto:elisa_cose@fitnyc.edu">Say hello <span>↗</span></a></nav></header>
  <main><section className="hero" id="home" aria-label="Meet Elisa Cose"><div className="name-wrap"><h1>ELISA <em>COSE</em><span className="period">.</span></h1></div><div className="scene-layer" aria-hidden="true"><Suspense fallback={null}><Scene play={play} reduced={reduced} onReady={onReady}/></Suspense></div><LoadingSnake loading={!sceneReady}/><div className="intro-controls">{entering?<button onClick={skip}>Skip intro ↗</button>:<button onClick={replay} aria-label="Replay intro animation"><span>↻</span> Replay intro</button>}</div><div className="hero-foot"><p>A people person with a world of ideas.<br/><span>Bringing them together, online & offline.</span></p></div><div className="bottomline"><span>EVENTS · CONTENT · DESIGN</span><span>SCROLL TO GET TO KNOW ME ↓</span></div></section>
- <Work reduced={reduced}/><Experience/>
+ <BrandTicker/><Work reduced={reduced}/><Experience/>
  <section className="about-section" id="about"><div className="about-photo-column"><span className="eyebrow">03 / BEYOND THE INTRO</span><Polaroid reduced={reduced}/></div><div><h2>People person.<br/>Idea collector.<br/><em>Professional yapper.</em></h2><p>I’m Elisa, a New York–based content marketer, event organizer, and designer. I’m currently the Content Marketing and Events Lead at Henry AI, building connections across tech, creators, and community.</p><p>Outside of work? Probably a Vietnamese coffee in hand, Olivia Dean on repeat, and another idea for getting everyone together.</p><p className="education-note">Studying Advertising and Marketing Communications at the Fashion Institute of Technology, with graduation expected December 2026. Dean’s List · Phi Theta Kappa · Member of Rewrite the Code.</p><a href="https://www.linkedin.com/in/elisa-cose/" target="_blank" rel="noreferrer" className="text-link">Find me on LinkedIn ↗</a></div></section>
  <PhotoBoothFooter reduced={reduced}/></main>
  </>}
