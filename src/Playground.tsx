@@ -4,6 +4,7 @@ import LoadingSnake from './LoadingSnake';
 import './playground.css';
 const BlocksGame=lazy(()=>import('./BlocksGame'));
 const items=[
+ {title:'Comp 1',kind:'Video edit',image:'playground/comp-1.jpg',video:'playground/comp-1.mp4',color:'#d7e6b9'},
  {title:'DIVINE',kind:'Video edit',image:'playground/divine.jpg',video:'playground/divine.mp4',color:'#c9b9ea'},
  {title:'Testing testing 123',kind:'Video edit',image:'playground/testing-testing-123.jpg',video:'playground/testing-testing-123.mp4',color:'#efb8d1'},
 ];
